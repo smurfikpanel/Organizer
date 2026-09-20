@@ -144,7 +144,7 @@ def _call_gemini(parts: list) -> str:
 
 def classify_message(text: str) -> dict:
     """Надсилає текст у Gemini і повертає розібраний JSON з типом та полями."""
-    now = dt.datetime.now().strftime("%Y-%m-%d %H:%M (%A)")
+    now = dt.datetime.now(config.TZ).strftime("%Y-%m-%d %H:%M (%A)")
     prompt = CLASSIFY_PROMPT_TEMPLATE.format(now=now, message=text)
     raw_text = _call_gemini([{"text": prompt}])
     return _parse_json_response(raw_text, fallback_text=text)
@@ -153,7 +153,7 @@ def classify_message(text: str) -> dict:
 def transcribe_and_classify(file_path: str) -> dict:
     """Один запит до Gemini: транскрибує аудіо і одразу класифікує його. Аудіо передається
     inline (base64, прямо в тілі запиту)."""
-    now = dt.datetime.now().strftime("%Y-%m-%d %H:%M (%A)")
+    now = dt.datetime.now(config.TZ).strftime("%Y-%m-%d %H:%M (%A)")
     prompt = VOICE_PROMPT_TEMPLATE.format(now=now)
 
     with open(file_path, "rb") as f:
@@ -181,3 +181,4 @@ def _parse_json_response(raw_text: str, fallback_text: str | None) -> dict:
             "note": {"text": fallback_text or raw},
             "transcript": fallback_text or "",
         }
+
