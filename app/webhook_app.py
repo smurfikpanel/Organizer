@@ -43,7 +43,7 @@ async def on_startup(app: web.Application):
 
 
 async def on_shutdown(app: web.Application):
-    await bot.delete_webhook()
+    await bot.session.close()
 
 
 async def health(request: web.Request) -> web.Response:
@@ -69,3 +69,4 @@ def create_app() -> web.Application:
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "10000"))
     web.run_app(create_app(), host="0.0.0.0", port=port)
+
