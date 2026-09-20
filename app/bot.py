@@ -110,7 +110,7 @@ async def _dispatch_result(message: Message, result: dict, text: str):
         when_str = r.get("datetime")
         advance_days = r.get("advance_days")
         try:
-            when = dt.datetime.strptime(when_str, "%Y-%m-%d %H:%M")
+            when = dt.datetime.strptime(when_str, "%Y-%m-%d %H:%M").replace(tzinfo=config.TZ)
         except (ValueError, TypeError):
             await message.answer(
                 "Не зміг розпізнати точний час нагадування 🤔 "
@@ -254,7 +254,7 @@ async def _apply_edit(message: Message, target: str, matches: list, e: dict):
         new_dt = e.get("new_datetime")
         if new_dt:
             try:
-                when = dt.datetime.strptime(new_dt, "%Y-%m-%d %H:%M")
+                when = dt.datetime.strptime(new_dt, "%Y-%m-%d %H:%M").replace(tzinfo=config.TZ)
             except ValueError:
                 pass
         for m in matches:
@@ -464,3 +464,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
