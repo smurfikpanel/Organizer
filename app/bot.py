@@ -54,7 +54,7 @@ def _is_rate_limit(e: httpx.HTTPStatusError) -> bool:
 
 async def _process_text(message: Message, text: str):
     try:
-        result = gemini_service.classify_message(text)
+        result = await gemini_service.classify_message(text)
     except httpx.HTTPStatusError as e:
         if _is_rate_limit(e):
             await message.answer(
@@ -422,7 +422,7 @@ async def handle_voice(message: Message):
     await bot.download_file(file_info.file_path, destination=tmp_path)
 
     try:
-        result = gemini_service.transcribe_and_classify(tmp_path)
+        result = await gemini_service.transcribe_and_classify(tmp_path)
     except httpx.HTTPStatusError as e:
         os.remove(tmp_path)
         if _is_rate_limit(e):
