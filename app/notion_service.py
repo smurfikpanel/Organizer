@@ -14,7 +14,7 @@ def add_expense(amount: float, currency: str, category: str, account: str, descr
         "Amount": {"number": amount},
         "Currency": {"select": {"name": currency or config.DEFAULT_CURRENCY}},
         "Category": {"select": {"name": category or "Other"}},
-        "Date": {"date": {"start": dt.date.today().isoformat()}},
+        "Date": {"date": {"start": dt.datetime.now(config.TZ).date().isoformat()}},
     }
     if account:
         properties["Account"] = {"select": {"name": account}}
@@ -207,7 +207,7 @@ def expense_stats(filter_query: str | None = None) -> dict:
             count += 1
         return {"mode": "filtered", "query": filter_query, "count": count, "totals": dict(totals)}
 
-    today = dt.date.today()
+    today = dt.datetime.now(config.TZ).date()
     return {"mode": "month", "report": monthly_report(today.year, today.month)}
 
 
@@ -263,7 +263,7 @@ def monthly_report(year: int, month: int) -> str:
         "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
         "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень",
     ]
-    today = dt.date.today()
+    today = dt.datetime.now(config.TZ).date()
     lines = [f"📊 {month_names[month - 1]} {year} (станом на {today.day})", ""]
     lines.append("💰 Витрати: $%.2f" % total)
     for cat, (amt, cnt) in sorted(by_category.items(), key=lambda x: -x[1][0]):
@@ -274,3 +274,4 @@ def monthly_report(year: int, month: int) -> str:
         lines.append(f"  {acc}: -${amt:.2f}")
 
     return "\n".join(lines)
+
