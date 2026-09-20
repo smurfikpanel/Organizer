@@ -1,4 +1,6 @@
 import os
+from zoneinfo import ZoneInfo
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,6 +15,11 @@ NOTION_REMINDERS_DB_ID = os.getenv("NOTION_REMINDERS_DB_ID")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DEFAULT_CURRENCY = os.getenv("DEFAULT_CURRENCY", "USD")
+
+# Часовий пояс, за яким бот рахує "зараз", дати й нагадування — незалежно від того,
+# де фізично працює сервер (Render, наприклад, працює за UTC). За замовчуванням Київ.
+TIMEZONE_NAME = os.getenv("TIMEZONE", "Europe/Kyiv")
+TZ = ZoneInfo(TIMEZONE_NAME)
 
 REQUIRED_VARS = {
     "TELEGRAM_BOT_TOKEN": TELEGRAM_BOT_TOKEN,
