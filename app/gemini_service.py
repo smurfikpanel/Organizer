@@ -129,28 +129,29 @@ VOICE_PROMPT_TEMPLATE = """Ти отримав аудіофайл з голос�
 )
 
 
-def _call_gemini(parts: list) -> str:
-    """Прямий HTTP-запит до Gemini REST API (без важкого SDK) — повертає текст відповіді."""
-    response = httpx.post(
-        API_URL,
-        params={"key": config.GEMINI_API_KEY},
-        json={"contents": [{"parts": parts}]},
-        timeout=60,
-    )
+async def _call_gemini(parts: list) -> str:
+    """Прямий асинхронний HTTP-запит до Gemini REST API — не блокує решту сервера,
+    поки чекає відповідь."""
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.post(
+            API_URL,
+            params={"key": config.GEMINI_API_KEY},
+            json={"contents": [{"parts": parts}]},
+        )
     response.raise_for_status()
     data = response.json()
     return data["candidates"][0]["content"]["parts"][0]["text"]
 
 
-def classify_message(text: str) -> dict:
+async def classify_message(text: str) -> dict:
     """Надсилає текст у Gemini і повертає розібраний JSON з типом та полями."""
     now = dt.datetime.now(config.TZ).strftime("%Y-%m-%d %H:%M (%A)")
     prompt = CLASSIFY_PROMPT_TEMPLATE.format(now=now, message=text)
-    raw_text = _call_gemini([{"text": prompt}])
+    raw_text = await _call_gemini([{"text": prompt}])
     return _parse_json_response(raw_text, fallback_text=text)
 
 
-def transcribe_and_classify(file_path: str) -> dict:
+async def transcribe_and_classify(file_path: str) -> dict:
     """Один запит до Gemini: транскрибує аудіо і одразу класифікує його. Аудіо передається
     inline (base64, прямо в тілі запиту)."""
     now = dt.datetime.now(config.TZ).strftime("%Y-%m-%d %H:%M (%A)")
@@ -163,7 +164,7 @@ def transcribe_and_classify(file_path: str) -> dict:
         {"inline_data": {"mime_type": "audio/ogg", "data": audio_b64}},
         {"text": prompt},
     ]
-    raw_text = _call_gemini(parts)
+    raw_text = await _call_gemini(parts)
     result = _parse_json_response(raw_text, fallback_text=None)
     result.setdefault("transcript", "")
     return result
