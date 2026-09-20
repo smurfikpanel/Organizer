@@ -4,7 +4,7 @@ import logging
 
 from aiogram import Bot
 
-from app import notion_service
+from app import config, notion_service
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ async def reminder_loop(bot: Bot):
     """Раз на хвилину перевіряє Notion на прострочені нагадування і надсилає їх."""
     while True:
         try:
-            now = dt.datetime.now()
+            now = dt.datetime.now(config.TZ)
             due = notion_service.get_due_reminders(now)
             for page in due:
                 props = page["properties"]
